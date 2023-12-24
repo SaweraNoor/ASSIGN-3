@@ -1,0 +1,101 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+// Product Class
+class Product {
+public:
+    int productId;
+    string productName;
+    double price;
+
+    // Constructor
+    Product(int id, const string& name, double p) : productId(id), productName(name), price(p) {}
+
+    // Display product details
+    void displayProductDetails() const {
+        cout << "Product ID: " << productId << ", Name: " << productName << ", Price: $" << price << endl;
+    }
+};
+
+// ShoppingCart Class
+class ShoppingCart {
+private:
+    Product** products; 
+    int numProducts;
+    int capacity;
+
+public:
+    ShoppingCart() : numProducts(0), capacity(5) {
+        products = new Product*[capacity];
+    }
+    ~ShoppingCart() {
+        for (int i = 0; i < numProducts; ++i) {
+            delete products[i];
+        }
+        delete[] products;
+    }
+
+    void addProduct(Product* product) {
+        if (numProducts == capacity) {
+            capacity *= 2;
+            Product** newProducts = new Product*[capacity];
+            for (int i = 0; i < numProducts; ++i) {
+                newProducts[i] = products[i];
+            }
+            delete[] products;
+            products = newProducts;
+        }
+
+        products[numProducts++] = product;
+    }
+    void displayAllProducts() const {
+        cout << "Products in the shopping cart:" << endl;
+        for (int i = 0; i < numProducts; ++i) {
+            products[i]->displayProductDetails();
+        }
+    }
+
+    // Calculate the total cost of all products in the cart
+    double calculateTotalCost() const {
+        double totalCost = 0.0;
+        for (int i = 0; i < numProducts; ++i) {
+            totalCost += products[i]->price;
+        }
+        return totalCost;
+    }
+};
+
+class User {
+public:
+    int userId;
+    ShoppingCart* shoppingCart; 
+    User(int id) : userId(id), shoppingCart(nullptr) {}
+    void displayUserDetails() const {
+        cout << "User ID: " << userId << endl;
+    }
+};
+
+int main() {
+    // Create instances of products
+    Product* product1 = new Product(1, "Laptop", 999.99);
+    Product* product2 = new Product(2, "Smartphone", 499.99);
+
+    // Create instances of users
+    User* user1 = new User(101);
+    User* user2 = new User(102);
+    user1->shoppingCart = new ShoppingCart();
+    user1->shoppingCart->addProduct(product1);
+    user1->shoppingCart->addProduct(product2);
+    user1->displayUserDetails();
+    user1->shoppingCart->displayAllProducts();
+    cout << "Total Cost: $" << user1->shoppingCart->calculateTotalCost() << endl;
+    delete user1->shoppingCart;
+    delete user1;
+    delete user2;
+    delete product1;
+    delete product2;
+
+    return 0;
+}
